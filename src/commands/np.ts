@@ -6,7 +6,6 @@ import duration from 'format-duration'
 
 import { 
   state,
-  requestSongInput,
   randomBotMessages
 } from '../modules'
 
@@ -42,7 +41,6 @@ const nowPlaying: TopLevelCommand = {
             image: {
               url: track.thumbnail
             },
-            description: `${randomBotMessages}\n${requestSongInput(track.title, track.author) === 'no summary available.' ? `${requestSongInput(track.title, track.author)}` : 'I\'m not too sure about this song.'}`,
             footer: {
               text: `Song Progress: [${duration(Date.now() - trackTimer)}/${duration(track.durationMS)}]`,
             }
