@@ -1,0 +1,3 @@
+# lyri
+
+A simple music bot I made for playin D&D ambience and boss music...
