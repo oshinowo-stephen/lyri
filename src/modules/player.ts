@@ -1,7 +1,7 @@
 import { DefaultExtractors } from '@discord-player/extractor'
 import { Player, createErisCompat } from 'discord-player'
 import { YoutubeiExtractor } from 'discord-player-youtubei'
-import { logger } from '@hephaestus/utils'
+import { LyriLogger as logger } from '.'
 import { Member } from 'eris'
 import { client } from './lyri'
 
@@ -13,9 +13,9 @@ export const state = {
 }
 
 player.events.on('playerStart', (_queue, track) => {
-    logger.info(`Playing track: ${track.title}`)
+  logger.info(`Playing track: ${track.title}`)
 
-    state.trackTimers.set(track.id, Date.now())
+  state.trackTimers.set(track.id, Date.now())
 })
 
 player.events.on('playerSkip', (_queue, _track) => {
@@ -39,31 +39,31 @@ player.events.on('debug', (_queue, message) => {
 })
 
 player.events.on('error', async (_queue, error) => {
-    logger.error('the discord-player fell into an error:\n\n')
- 
-    console.error(error)
+  logger.error('the discord-player fell into an error:\n\n')
 
-    await _queue.metadata.createMessage({
-      content: 'I fell into a stump, error logs was sent to my father... Hopefully this will be resolved soon...',
-      flags: 64
-    })
+  console.error(error)
+
+  await _queue.metadata.createMessage({
+    content: 'I fell into a stump, error logs was sent to my father... Hopefully this will be resolved soon...',
+    flags: 64
+  })
 })
 
 player.events.on('playerError', async (_queue, error, track) => {
-    logger.error(`display-player had an player error playing this: ${track.cleanTitle}\n\n`)
-    
-    console.error(error)
+  logger.error(`display-player had an player error playing this: ${track.cleanTitle}\n\n`)
+  
+  console.error(error)
 
-    await _queue.metadata.createMessage({
-      content: `I've ran into an error trying to play: ${track.title} by ${track.author}, removing it from queue.
-      \`\`\`${error}\`\`\`
-      Check with <@229651386223034368>
-      `,
-      flags: 64
-    })
+  await _queue.metadata.createMessage({
+    content: `I've ran into an error trying to play: ${track.title} by ${track.author}, removing it from queue.
+    \`\`\`${error}\`\`\`
+    Check with <@229651386223034368>
+    `,
+    flags: 64
+  })
 })
 
 player.extractors.loadMulti(DefaultExtractors)
-  .catch((error) => console.log(error))
+  .catch((error: any) => logger.error(error))
 player.extractors.register(YoutubeiExtractor, {})
-  .catch((error) => console.log(error))
+  .catch((error: any) => logger.error(error))

@@ -1,10 +1,10 @@
 import { Event } from '@hephaestus/eris'
-import { logger } from '@hephaestus/utils'
+import { LyriLogger as logger } from '../modules'
 
 const ready: Event = {
     name: 'ready',
     handler: () => { 
-      logger.info('Lyri is now connected to the discord\'s API') 
+      logger.info('Now connected to the discord\'s API') 
     }
 }
 

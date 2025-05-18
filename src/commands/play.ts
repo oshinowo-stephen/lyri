@@ -54,7 +54,12 @@ const play: TopLevelCommand = {
         try {
             const { track } = await player.play(channel, query, {
                 nodeOptions: {
-                    metadata: interaction
+                    leaveOnEnd: false,
+                    leaveOnEmpty: false,
+                    leaveOnStop: true,
+                    leaveOnStopCooldown: (30 * 1000),
+                    leaveOnEmptyCooldown: (5 * 60 * 1000),
+                    metadata: interaction,
                 }
             })
           
