@@ -1,11 +1,12 @@
 import { Event } from '@hephaestus/eris'
-import { LyriLogger as logger } from '../modules'
+import { client } from '@modules/lyri'
+import { LyriLogger as logger } from '@utils/logger'
 
 const ready: Event = {
-    name: 'ready',
-    handler: () => { 
-      logger.info('Now connected to the discord\'s API') 
-    }
+  name: 'ready',
+  handler: () => {
+    logger.info(`${client.user.username} is now ready to go!`)
+  }
 }
 
 export default ready

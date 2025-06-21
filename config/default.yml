@@ -1,3 +1,2 @@
-
-DEEPSEEK_CHAT_ENDPOINT: https://api.deepseek.command
-GENIUS_ENDPOINT: https://api.genius.com
+LOG_LEVEL: 1 # == 0 (base logs), <= 1 (base logs, and debugging), == 2 (base logs, debugging, and tracing)
+NODE_ENV: staging

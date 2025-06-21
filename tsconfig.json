@@ -3,7 +3,7 @@
     "target": "es6",
     "module": "commonjs",
     "downlevelIteration": true,
-    "outDir": "dist",
+    "outDir": "./dist",
     "rootDir": ".",
     "sourceMap": true,
     "removeComments": true,
@@ -12,5 +12,10 @@
     "esModuleInterop": true,
     "noUncheckedIndexedAccess": true,
     "baseUrl": "./src",
+    "paths": {
+      "@utils/*": ["utils/*"],
+      "@modules/*": ["modules/*"],
+      "@services/*": ["services/*"]
+    }
   }
 }
