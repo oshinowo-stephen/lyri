@@ -1,29 +1,42 @@
 import { TopLevelCommand } from '@hephaestus/eris'
-
-import { QueueRepeatMode, useQueue } from 'discord-player'
+import { player as PlayerNode } from '@services/player'
+import { logger } from '@hephaestus/utils'
 
 const purge: TopLevelCommand = {
-    type: 1,
-    name: 'purge',
-    description: 'Purge the queue, and remove all current tracks!',
-    action: async (interaction): Promise<void> => {
-        const queue = useQueue(interaction.guildID || '')
-        if (!queue) return interaction.createMessage({
-          content: 'There is no queue',
-          flags: 64,
-        })
+  type: 1,
+  name: 'purge',
+  description: 'Clear all tracks from the queue, and stop current track.',
+  action: async (interaction): Promise<void> => {
+    const { queueManager } = PlayerNode
 
-        if (queue.repeatMode !== QueueRepeatMode.OFF) {
-          queue.setRepeatMode(QueueRepeatMode.OFF)
-        }
+    await interaction.acknowledge()
+    const response = await interaction.createFollowup({
+      content: '... Purging queue... Please standby...',
+      flags: 64,
+    })
 
-        queue.clear()
-
-        interaction.createMessage({ 
-          content:`Successfully purged the queue! Now skipping current song...`,
-          flags: 64,
-        })
+    if (!queueManager) {
+      response.edit('❌ There is no current manager available... Please report this to the developers!')
+      return
     }
+
+    const queue = queueManager.queue(interaction.guildID ?? '')
+
+    if (!queue) {
+      response.edit('❌ The queue is already gone!')
+      return
+    }
+
+    try {
+      await queue.purge()
+
+      response.edit('QUEUE PURGED!!! Sorry it had to end like this...')
+    } catch (error) {
+      logger.error(error)
+
+      response.edit('❌ Failed to purge the queue!')
+    }
+  }
 }
 
 export default purge

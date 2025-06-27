@@ -1,54 +1,49 @@
 import { TopLevelCommand } from '@hephaestus/eris'
-import { QueueRepeatMode, useQueue } from 'discord-player'
+import { LoopMode } from '@modules/queue-manager'
+import { player } from '@services/player'
 
 const loop: TopLevelCommand = {
-    type: 1,
-    name: 'loop',
-    description: 'Loop the current track or queue.',
-    options: [
-      {
-        type: 3,
-        name: 'mode',
-        description: 'Turn loop off, loop track or queue',
-        required: true
-      }
-    ],
-    action: async (interaction, args) => {
-      const mode = args['mode']?.value || 'off'
-      const queue = useQueue(interaction.guildID || '')
-      if (!queue) return interaction.createMessage({
-        content: 'There is nothing in queue',
-        flags: 64,
-      })
-      
-      let message: string = `No such mode...`
-
-      switch (mode) {
-        case 'off':
-        case 'stop':
-          queue.setRepeatMode(QueueRepeatMode.OFF)
-
-          message = 'Looping off!'
-          break
-        case 'song':
-        case 'track':
-          queue.setRepeatMode(QueueRepeatMode.TRACK)
-
-          message = 'Looping track!'
-          break
-        case 'queue':
-        case 'playlist':
-          queue.setRepeatMode(QueueRepeatMode.QUEUE)
-
-          message = 'Looping queue!'
-          break
-      }
-
-      interaction.createMessage({
-        content: message,
-        flags: 64
-      })
+  type: 1,
+  name: 'loop',
+  description: 'Loop the current track or queue.',
+  options: [
+    {
+      type: 3,
+      name: 'mode',
+      description: 'The loop mode to set.',
+      required: true,
+      choices: [
+        {
+          name: 'Track',
+          value: 'track',
+        },
+        {
+          name: 'Queue',
+          value: 'queue',
+        },
+        {
+          name: 'Off',
+          value: 'off',
+        },
+      ],
+    },
+  ],
+  action: async (interaction, args): Promise<void> => {
+    const queueManager = player.queueManager
+    if (!queueManager) {
+      return interaction.createMessage('❌ There is no current manager available... Please report this to the developers!')
     }
+
+    const queue = queueManager.queue(interaction.guildID ?? '')
+    if (!queue) {
+      return interaction.createMessage('❌ There is no song in queue to loop!')
+    }
+
+    const mode = args['mode'] ? args['mode'].value as LoopMode : 'off'
+    queue.setLoopMode(mode)
+
+    return interaction.createMessage(`Now looping: **${queue.loopMode.toUpperCase()}**`)
+  }
 }
 
 export default loop
