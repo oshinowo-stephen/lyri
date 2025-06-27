@@ -30,7 +30,7 @@ export default class Queue {
   private _currentTrackPosition: number = 0
   private _loopMode: LoopMode = 'off'
   private _leaveOnEmpty: boolean = false
-  private _leaveOnEmptyTimeout: number = (10 * 1000) // Default to 10 seconds
+  private _leaveOnEmptyTimeout: number = (25 * 1000) // Default to 10 seconds
 
   get queue(): readonly Track[] {
     return this._tracks
@@ -99,11 +99,11 @@ export default class Queue {
 
   changeTrackPosition(position: number): void {
     if (position < 0 || position >= this.size) {
-      throw new Error('Position out of bounds')
+      throw new QueueError('CHANGE_TRACK_POS', 'Position out of bounds')
     }
 
     if (this._tracks.length === 0) {
-      throw new Error('Queue is empty')
+      throw new QueueError('CHANGE_TRACK_POS', 'Queue is empty')
     }
 
     if (this._currentPlaybackTrack && this._currentTrackPosition === position) {
@@ -168,7 +168,7 @@ export default class Queue {
 
     for (const index of indices) {
       if (index < 0 || index >= this._tracks.length) {
-        throw new Error(`Index ${index} out of bounds`)
+        throw new QueueError('REMOVE_TRACKS', `Index ${index} out of bounds`)
       }
       this._tracks.splice(index, 1)
     }
@@ -198,5 +198,19 @@ export default class Queue {
 
   shuffleQueue(): void {
     this._tracks = shuffleArray(this._tracks)
+  }
+
+  leaveOnEmptySet(param: boolean): void {
+    this._leaveOnEmpty = param
+  }
+
+  setLeaveOnEmptyTimer(timeout: number): void {
+    if (timeout > 0) {
+      this._leaveOnEmpty = false
+
+      this._leaveOnEmptyTimeout = timeout
+    } else {
+      this._leaveOnEmptyTimeout = 0
+    }
   }
 }

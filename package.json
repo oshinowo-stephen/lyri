@@ -6,7 +6,6 @@
   },
   "dependencies": {
     "@discordx/lava-player": "^2.1.4",
-    "@discordx/lava-queue": "^4.0.8",
     "@hephaestus/core": "1.0.0-alpha.17",
     "@hephaestus/eris": "1.0.0-alpha.23",
     "@hephaestus/utils": "1.0.0-alpha.8",

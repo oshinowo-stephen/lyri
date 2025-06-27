@@ -29,8 +29,6 @@ const loop: TopLevelCommand = {
     },
   ],
   action: async (interaction, args): Promise<void> => {
-    await interaction.acknowledge()
-
     const queueManager = player.queueManager
     if (!queueManager) {
       return interaction.createMessage('❌ There is no current manager available... Please report this to the developers!')

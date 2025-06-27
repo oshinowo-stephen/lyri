@@ -34,11 +34,28 @@ export default class Manager {
 
         void queue.playNextTrack()
           .catch(
-            (error: Error) => error instanceof QueueError
-              ? error.name === 'NO_TRACKS'
-                ? logger.warn(error.message)
-                : logger.error(error.message)
-              : console.log('An unknown error has occurred:\n', error)
+            (error: Error) => {
+              if (error instanceof QueueError) {
+                if (error.name === 'NO_TRACKS') {
+                  // if neither of these two cases happens, we'll just sit in the VC.
+                  if (!queue.leaveOnEmpty && queue.leaveOnEmptyTimeout > 0) {
+                    setTimeout(() => {
+                      if (!queue.playing && queue.size === 0) {
+                        logger.warn(`The queue is empty after: ${queue.leaveOnEmptyTimeout / 1000} seconds. Leaving current channel.`)
+
+                        void queue.player.leave()
+                      }
+                    }, queue.leaveOnEmptyTimeout)
+                  } else if (queue.leaveOnEmpty && queue.leaveOnEmptyTimeout === 0) {
+                    if (!queue.playing && queue.size === 0) {
+                      void queue.player.leave()
+                    }
+                  }
+                } else {
+                  console.log('An unknown error has occurred:\n', error)
+                }
+              }
+            }
           )
       }
     })

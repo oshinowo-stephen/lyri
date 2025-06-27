@@ -22,6 +22,7 @@ export interface Player {
   client?: ErisClient,
   currentTrackPosition: number,
   queueManager?: Manager
+  uptime: number
 }
 
 export interface MemberQueue {
@@ -37,6 +38,7 @@ export const player: Player = {
   client: undefined,
   currentTrackPosition: 0,
   queueManager: undefined,
+  uptime: 0
 }
 
 player.client = client
@@ -66,6 +68,8 @@ player.node = new Node({
 player.queueManager = new Manager(player.node)
 
 player.node?.on('ready', () => {
+  player.uptime = Date.now()
+
   logger.info(`Lavalink [WS]: Client connected to Lavalink server, WE'RE READY!!!`)
 })
 
@@ -132,7 +136,7 @@ const opHandlers = {
   event: (packet: OpResponse) => {
     const eventType: string = (<OPEvent>packet).type
     const guildPlayer = player.node?.guildPlayerStore.get((<OPEvent>packet).guildId ?? '')
-    const queue = player.queueManager?.queue((<OPEvent>packet).guildId ?? '')
+    // const queue = player.queueManager?.queue((<OPEvent>packet).guildId ?? '')
     const track = (<TrackStartEvent | TrackEndEvent>packet).track as Track
 
     if (eventType === 'TrackStartEvent') {
@@ -142,15 +146,7 @@ const opHandlers = {
         logger.info(`Lavalink [WS]: (EVENT): Track started - ${track.info.title} played by ${track.userData?.playedBy?.username ?? 'Unknown'} in guild ${guildPlayer.guildId}`)
       }
     } else if (eventType === 'TrackEndEvent') {
-      if (guildPlayer && (queue && queue.leaveOnEmptyTimeout > 0)) {
-        setTimeout(() => {
-          if (!queue.playing && queue.size === 0) {
-            logger.warn(`The queue is empty after: ${queue.leaveOnEmptyTimeout / 1000}. I am leaving this channel.`)
-
-            queue.player.leave()
-          }
-        }, queue.leaveOnEmptyTimeout)
-      }
+      logger.info(`Lavalink [WS]: (EVENT): Track ended - ${track.info.title} played by ${track.userData?.playedBy?.username ?? 'Unknown'} in guild ${guildPlayer?.guildId}`)
     }
   },
   stats: (packet: OpResponse) => {
