@@ -15,13 +15,14 @@ A simple bot that just plays music! Originally and still is something I made for
 - Lavalink
 - Discord Bot API-Key
 - Genius API-Key (Optional)
-- Advantage-AI API-Key (Optional)
 
 ### Setting it up
 
 - See here about running the redis server:
+[Redis Official Website](https://redis.io/)
 
 - See here about running the lavalink server:
+[Official Lavalink Website](https://lavalink.dev/)
 
 ### Startin the bot up
 
@@ -42,6 +43,6 @@ $ npm i && npm run start
 
 ### Contributing
 
-[Pull Requests]() & [Issues]() are a great way to ~~do work~~ handle things for me! Most would be most appreciated!!! If you cannot provide that type of support simply coming my [Discord]() and describing an bug, error, or any glitch with the bot would be also apprecaited!
+[Pull Requests](https://github.com/oshinowo-stephen/lyri/pulls) & [Issues](https://github.com/oshinowo-stephen/lyri/issues) are a great way to ~~do work~~ handle things for me! Most would be most appreciated!!!
 
 And if you're feeling generous in anyway and wanna support the small indie companies, you can always [Buy Me a Coffee](https://buymeacoffee.com/whoastonic). No seriously anything can help get this off the ground would be great help...
