@@ -10,22 +10,24 @@ const ping: TopLevelCommand = {
   action: async (interaction, _, { client }): Promise<void> => {
     await interaction.acknowledge()
     const message = await interaction.createFollowup('Uhm...')
-    const latency = (Date.now() - message.timestamp)
+    const botResponse = (Date.now() - message.timestamp)
+    const avgLatency = [...client.shards.values()]
+      .reduce((a, s) => a + s.latency, 0) / client.shards.size
     const clientUptime = localizeDuration(client.uptime)
     const playerUptime = localizeDuration(player.uptime)
 
     const content: MessageContent = {
-      content: `Took me ${latency}ms to respond! ${
-        latency <= (latency / 1000) * 250
+      content: `Took me ${botResponse}ms to respond! ${
+        botResponse <= 100
           ? 'Pretty fast reaction time, huh?'
-          : latency <= (latency / 1000) * 500
+          : botResponse <= 1200
             ? 'Alright, but not my best...'
             : 'I\'M LAG-- GIN!!!'
       }`,
       embeds: [
         {
           color: 0xB01E28,
-          title: '💓 Status Checkup'.toLocaleUpperCase(),
+          title: `💓 Status Checkup | LATENCY BETWEEN SHARDS: ${avgLatency}ms`.toLocaleUpperCase(),
           description: `How am I doing? ${randomCheckUpMessage()}`,
           fields: [
             {
@@ -37,7 +39,7 @@ const ping: TopLevelCommand = {
             },
             {
               name: 'My longest running instrument?',
-              value: player.uptime !== 0
+              value: player.uptime !== 0 && player.node !== undefined
                 ? `I've been playing the ***${randomInstrument()}***, for ${playerUptime}`
                 : 'No instruments at the moment...',
               inline: true

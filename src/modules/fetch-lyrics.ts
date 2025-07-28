@@ -1,5 +1,10 @@
 import { LyriLogger as logger } from '@utils/logger'
-import { Client as GeniusClient  } from 'genius-lyrics'
+import { Client as GeniusClient } from 'genius-lyrics'
+import {
+  CacheError,
+  checkCache,
+  store as cacheStore,
+} from '@services/cache'
 import config from 'config'
 
 let geniusClient: GeniusClient | undefined
@@ -25,44 +30,76 @@ const fetch = async (query: string): Promise<GeniusResponse> => {
     throw new GeniusError('NO_KEY')
   }
 
+  logger.debug(`A genius key was found, trying to find lyrics for: (${query})`)
+
   try {
-    logger.debug(`A genius key was found, trying to find lyrics for: (${query})`)
+    const inCache = await checkCache(query)
 
-    const results = await geniusClient.songs.search(query)
-    if (results.length === 0) {
-      logger.warn('No results were returned searching for lyrics...')
-
-      throw new GeniusError('NO_SONGS_FOUND')
+    if (inCache.length > 0) {
+      logger.debug('Lyrics found in cache, using this instead.')
     }
 
-    const tracks = results.filter((song) =>
-      query.includes(song.title)
-        ? song
-        : null
-    )
+    return JSON.parse(inCache) as GeniusResponse
+  } catch (cacheError) {
+    if ((cacheError as CacheError).type === 'NOT_FOUND') {
+      try {
+        const results = await geniusClient.songs.search(query, {
+          sanitizeQuery: true
+        })
+        if (results.length === 0) {
+          logger.warn('No results were returned searching for lyrics...')
 
-    if (tracks.length === 0) {
-      throw new GeniusError('NO_MATCHING_SONGS')
+          throw new GeniusError('NO_SONGS_FOUND')
+        }
+
+        // filter tracsk to match a title
+        const tracks = results.filter(
+          (song) =>
+            !song.fullTitle.includes(query)
+              ? !song.featuredTitle.includes(query)
+                ? !song.title.includes(query)
+                  ? null
+                  : song
+                : song
+              : song
+        )
+
+        if (tracks.length === 0) {
+          throw new GeniusError('NO_MATCHING_SONGS')
+        }
+
+
+        // TODO: Filter tracks to match language/preference
+        const firstMatchedSong = tracks[0]
+        if (!firstMatchedSong) throw new GeniusClient('INVALID_FIRST_MATCHED')
+        const lyrics = await firstMatchedSong.lyrics()
+        const resp: GeniusResponse = {
+          lyrics: lyrics
+            .split('\n')
+            .splice(7, 12)
+            .join('\n'),
+          uri: firstMatchedSong.url
+        }
+
+        cacheStore(firstMatchedSong.title, JSON.stringify(resp))
+
+        return resp
+      } catch (geniusError) {
+        const error = geniusError as GeniusError
+
+        logger.error(`Genius error, [${error.name}]: ${error.message}`)
+
+        throw error
+      }
+    } else {
+      const error = cacheError as CacheError
+
+      logger.error(`A cache error occurred, [${error.type}]: ${error.message} (${error.name})`)
+
+      throw error
     }
-
-    const firstMatchedSong = tracks[0] // we might have to filter harder later on... but rn we'll be lazy.
-    if (!firstMatchedSong) throw new GeniusClient('INVALID_FIRST_MATCHED')
-    const lyrics = await firstMatchedSong.lyrics()
-
-    return {
-      lyrics: lyrics
-        .split('\n')
-        .splice(7, 12)
-        .join('\n'),
-      uri: firstMatchedSong.url
-    }
-  } catch (_error) {
-    logger.error('An error occurred fetching lyrics...')
-
-    console.error(_error)
-
-    throw new GeniusError('INVALID_ERROR')
   }
+
 }
 
 export default fetch

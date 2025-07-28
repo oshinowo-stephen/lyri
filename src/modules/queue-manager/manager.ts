@@ -1,5 +1,6 @@
 import { LyriLogger as logger } from '@utils/logger'
 import Queue, { QueueError } from './queue'
+import * as db from '@services/storage'
 
 import {
   Node,
@@ -8,6 +9,7 @@ import {
   EventType,
   TrackEndReason,
 } from '@discordx/lava-player'
+import { GuildPlayer } from '.prisma/client'
 
 export default class Manager {
   public queues: Map<string, Queue> = new Map()
@@ -20,16 +22,43 @@ export default class Manager {
       }
     })
 
-    node.on('event', (rawEvent: OPEvent) => {
+    node.on('event', async (rawEvent: OPEvent) => {
       if (
         rawEvent.type === EventType.TrackEndEvent &&
         rawEvent.reason === TrackEndReason.FINISHED
       ) {
         const queue = this.queues.get(rawEvent.guildId)
+
+        let guildSettings
+
+        try {
+          guildSettings = await db.fetch('guildPlayer', {
+            where: {
+              guildId: rawEvent.guildId
+            }
+          })
+        } catch(_error) {
+          console.error(_error)
+          // db.initialize('guildPlayer', {
+          //   djRole
+          //   guildId: rawEvent.guildId,
+
+          // })
+        }
+
         if (!queue) return
 
-        if (queue.leaveOnEmpty && queue.size === 0) {
-          void queue.player.leave()
+        const guildLeaveOnEmpty = (guildSettings as GuildPlayer).leaveOnEmpty
+        const guildOnEmptyTimeout = (guildSettings as GuildPlayer).leaveOnEmptyDuration
+
+        if (guildLeaveOnEmpty) {
+          logger.warn('Leaving channel now this guild has to set it to true')
+
+          if (!queue.playing && queue.size === 0) {
+            void queue.player.leave()
+          }
+        } else {
+          logger.warn('Staying in channel, this guild has set it to false')
         }
 
         void queue.playNextTrack()
@@ -38,21 +67,20 @@ export default class Manager {
               if (error instanceof QueueError) {
                 if (error.name === 'NO_TRACKS') {
                   // if neither of these two cases happens, we'll just sit in the VC.
-                  if (!queue.leaveOnEmpty && queue.leaveOnEmptyTimeout > 0) {
+                  console.log('no tracks trying to see')
+                  if (!guildLeaveOnEmpty && guildOnEmptyTimeout > 0) {
                     setTimeout(() => {
                       if (!queue.playing && queue.size === 0) {
-                        logger.warn(`The queue is empty after: ${queue.leaveOnEmptyTimeout / 1000} seconds. Leaving current channel.`)
+                        logger.warn(`The queue is empty after: ${guildOnEmptyTimeout / 1000} seconds. Leaving current channel.`)
 
                         void queue.player.leave()
                       }
-                    }, queue.leaveOnEmptyTimeout)
-                  } else if (queue.leaveOnEmpty && queue.leaveOnEmptyTimeout === 0) {
-                    if (!queue.playing && queue.size === 0) {
-                      void queue.player.leave()
-                    }
+                    }, guildOnEmptyTimeout)
                   }
                 } else {
                   console.log('An unknown error has occurred:\n', error)
+
+                  void queue.player.leave()
                 }
               }
             }
