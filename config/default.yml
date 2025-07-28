@@ -1,2 +1,6 @@
 LOG_LEVEL: 1 # == 0 (base logs), <= 1 (base logs, and debugging), == 2 (base logs, debugging, and tracing)
-NODE_ENV: staging
+NODE_ENV: dev
+DEVELOPER_ID: 229651386223034368
+REDIS_URL: redis://0.0.0.0:6379
+REDIS_CACHE_KEY: lyri-cache-key
+DEVELOPER_PAGE: https://github.com/oshinowo-stephen/lyri/blob/main/README.md

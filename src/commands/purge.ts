@@ -5,6 +5,15 @@ import { logger } from '@hephaestus/utils'
 const purge: TopLevelCommand = {
   type: 1,
   name: 'purge',
+  permission: {
+    level: 0,
+    name: 'admin',
+    action: async (interaction, data, client) => {
+      console.log(data)
+      // Implement your permission logic here if needed
+      return true
+    }
+  },
   description: 'Clear all tracks from the queue, and stop current track.',
   action: async (interaction): Promise<void> => {
     const { queueManager } = PlayerNode

@@ -29,8 +29,8 @@ export default class Queue {
   private _currentPlaybackTrack: Track | undefined = undefined
   private _currentTrackPosition: number = 0
   private _loopMode: LoopMode = 'off'
-  private _leaveOnEmpty: boolean = false
-  private _leaveOnEmptyTimeout: number = (25 * 1000) // Default to 10 seconds
+  // private _leaveOnEmpty: boolean = false
+  // private _leaveOnEmptyTimeout: number = (25 * 1000) // Default to 10 seconds
 
   get queue(): readonly Track[] {
     return this._tracks
@@ -48,13 +48,13 @@ export default class Queue {
     return this._loopMode
   }
 
-  get leaveOnEmpty(): boolean {
-    return this._leaveOnEmpty
-  }
+  // get leaveOnEmpty(): boolean {
+  //   return this._leaveOnEmpty
+  // }
 
-  get leaveOnEmptyTimeout(): number {
-    return this._leaveOnEmptyTimeout
-  }
+  // get leaveOnEmptyTimeout(): number {
+  //   return this._leaveOnEmptyTimeout
+  // }
 
   get size(): number {
     return this._tracks.length
@@ -200,17 +200,17 @@ export default class Queue {
     this._tracks = shuffleArray(this._tracks)
   }
 
-  leaveOnEmptySet(param: boolean): void {
-    this._leaveOnEmpty = param
-  }
+  // leaveOnEmptySet(param: boolean): void {
+  //   this._leaveOnEmpty = param
+  // }
 
-  setLeaveOnEmptyTimer(timeout: number): void {
-    if (timeout > 0) {
-      this._leaveOnEmpty = false
+  // setLeaveOnEmptyTimer(timeout: number): void {
+  //   if (timeout > 0) {
+  //     this._leaveOnEmpty = false
 
-      this._leaveOnEmptyTimeout = timeout
-    } else {
-      this._leaveOnEmptyTimeout = 0
-    }
-  }
+  //     this._leaveOnEmptyTimeout = timeout
+  //   } else {
+  //     this._leaveOnEmptyTimeout = 0
+  //   }
+  // }
 }

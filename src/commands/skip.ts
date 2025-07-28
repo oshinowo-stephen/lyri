@@ -1,9 +1,28 @@
 import { TopLevelCommand } from '@hephaestus/eris'
 import { player as PlayerNode } from '@services/player'
+import {
+  isDev,
+  isAdmin,
+  isDJ
+} from '@utils/perms'
+import { Member } from 'eris'
 
 const skip: TopLevelCommand = {
   type: 1,
   name: 'skip',
+  permission: {
+    level: 5,
+    name: 'able-to-skip',
+    action: async (interaction, data, _client) => {
+      console.log(data)
+      // Implement your permission logic here if needed
+      return (
+        isAdmin(interaction.member as Member)
+        || isDev(interaction.member as Member)
+        || isDJ(interaction.member as Member)
+      )
+    }
+  },
   description: 'Skip the current track.',
   action: async (interaction): Promise<void> => {
     const { queueManager } = PlayerNode

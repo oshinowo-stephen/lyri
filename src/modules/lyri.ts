@@ -1,6 +1,6 @@
 import { Hephaestus as Forge } from '@hephaestus/eris'
 import { join as __join } from 'path'
-import { ClientOptions, Client } from 'eris'
+import { ClientOptions } from 'eris'
 import config from 'config'
 
 export type ForgeExtended = Forge & {

@@ -1,3 +1,7 @@
 ignoredBuiltDependencies:
   - esbuild
   - ffmpeg-static
+onlyBuiltDependencies:
+  - '@prisma/client'
+  - '@prisma/engines'
+  - prisma
